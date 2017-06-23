@@ -33,6 +33,7 @@ class Addrinfo
   end
 
   def self.tcp(host, port)
+	STDERR.puts "Host is #{host}:#{port}"
     Addrinfo.getaddrinfo(host, port, nil, Socket::SOCK_STREAM, Socket::IPPROTO_TCP)[0]
   end
 
@@ -232,7 +233,7 @@ class TCPSocket
       super(host, service)
     else
       s = nil
-      e = SocketError
+      e = nil
       Addrinfo.foreach(host, service) { |ai|
         begin
           s = Socket._socket(ai.afamily, Socket::SOCK_STREAM, 0)
@@ -244,12 +245,14 @@ class TCPSocket
           end
           Socket._connect(s, ai.to_sockaddr)
           super(s, "r+")
-          return
+          break
         rescue => e0
           e = e0
         end
       }
-      raise e
+	if e
+      		raise e
+	end
     end
   end
 
